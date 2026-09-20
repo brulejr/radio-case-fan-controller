@@ -1,0 +1,151 @@
+esphome:
+  name: icom-2730a-fan-controller
+  friendly_name: IC-2730A Case Fan Controller
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Fallback hotspot if WiFi is unavailable (e.g. field deployment, no AP)
+  ap:
+    ssid: "Icom-2730A-Fan-Fallback"
+    password: !secret fallback_password
+
+captive_portal:
+
+# --- Temperature probe (DS18B20 on 1-Wire) ---
+one_wire:
+  - platform: gpio
+    pin: GPIO4
+    # NOTE: use a 4.7k pull-up resistor between the DS18B20 data line and 3.3V
+
+sensor:
+  - platform: dallas_temp
+    # TODO: replace with your probe's actual address — check the boot log after
+    # first flash, ESPHome will list any 1-Wire devices it finds on GPIO4
+    address: 0x0000000000000000
+    name: "Enclosure Temperature"
+    id: case_temp
+    update_interval: 5s
+    filters:
+      - median:
+          window_size: 5
+          send_every: 5
+
+  # Noctua fans output 2 tach pulses per revolution
+  - platform: pulse_counter
+    pin:
+      number: GPIO26
+      mode: INPUT_PULLUP
+    name: "Fan 1 (Outbound) RPM"
+    id: fan1_rpm
+    unit_of_measurement: "RPM"
+    filters:
+      - multiply: 30.0 # (pulses/min) / 2 pulses-per-rev
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO32
+      mode: INPUT_PULLUP
+    name: "Fan 2 (Inbound) RPM"
+    id: fan2_rpm
+    unit_of_measurement: "RPM"
+    filters:
+      - multiply: 30.0
+
+# --- PWM control lines to fans (hardware LEDC @ 25kHz, per Noctua spec) ---
+output:
+  - platform: ledc
+    pin: GPIO25
+    id: fan1_pwm_out
+    frequency: 25000 Hz
+
+  - platform: ledc
+    pin: GPIO27
+    id: fan2_pwm_out
+    frequency: 25000 Hz
+
+# --- Mode toggle: dual-fan (in+out) vs single-fan (outbound only, passive intake) ---
+switch:
+  - platform: template
+    name: "Dual Fan Mode"
+    id: dual_fan_mode
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+
+# --- Fan curve parameters, exposed so they're tunable without reflashing ---
+number:
+  - platform: template
+    name: "Fan Curve Min Temp (C)"
+    id: min_temp_c
+    min_value: 0
+    max_value: 60
+    step: 1
+    initial_value: 25
+    optimistic: true
+    restore_value: true
+
+  - platform: template
+    name: "Fan Curve Max Temp (C)"
+    id: max_temp_c
+    min_value: 0
+    max_value: 80
+    step: 1
+    initial_value: 45
+    optimistic: true
+    restore_value: true
+
+  - platform: template
+    name: "Fan Minimum Duty"
+    id: min_duty
+    min_value: 0
+    max_value: 1
+    step: 0.05
+    initial_value: 0.3 # Noctua fans generally need ~30% duty to reliably start
+    optimistic: true
+    restore_value: true
+
+# --- Control loop: map temperature to PWM duty on a linear ramp ---
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          float t = id(case_temp).state;
+          if (isnan(t)) return;
+
+          float lo = id(min_temp_c).state;
+          float hi = id(max_temp_c).state;
+          float floor_duty = id(min_duty).state;
+          float duty = 0.0;
+
+          if (t <= lo) {
+            duty = 0.0;
+          } else if (t >= hi) {
+            duty = 1.0;
+          } else {
+            float ratio = (t - lo) / (hi - lo);
+            duty = floor_duty + ratio * (1.0 - floor_duty);
+          }
+
+          id(fan1_pwm_out).set_level(duty);
+
+          if (id(dual_fan_mode).state) {
+            id(fan2_pwm_out).set_level(duty);
+          } else {
+            id(fan2_pwm_out).set_level(0.0);
+          }

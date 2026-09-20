@@ -1,4 +1,4 @@
-# IC-2730A Case Fan Controller
+# Radio Case Fan Controller
 
 ESP32 + ESPHome temperature-controlled fan module for cooling enclosed radio
 equipment cases (initial target: the ICOM IC-2730A compact organizer, reusable
@@ -19,13 +19,13 @@ Breadboard prototype phase. Not yet packaged into an enclosure.
 
 ## Pinout (ESP-WROOM-32)
 
-| Signal                  | GPIO   | Notes                                              |
-|--------------------------|--------|-----------------------------------------------------|
-| DS18B20 data (1-Wire)    | GPIO4  | 4.7kΩ pull-up to 3.3V between data and VCC          |
-| Fan 1 (outbound) PWM     | GPIO25 | Hardware LEDC output, 25kHz per Noctua PWM spec     |
-| Fan 1 tach                | GPIO26 | Open-collector; 10kΩ pull-up to **3.3V**, not 5V    |
-| Fan 2 (inbound) PWM      | GPIO27 | Hardware LEDC output, 25kHz                          |
-| Fan 2 tach                | GPIO32 | Open-collector; 10kΩ pull-up to **3.3V**, not 5V    |
+| Signal                | GPIO   | Notes                                            |
+| --------------------- | ------ | ------------------------------------------------ |
+| DS18B20 data (1-Wire) | GPIO4  | 4.7kΩ pull-up to 3.3V between data and VCC       |
+| Fan 1 (outbound) PWM  | GPIO25 | Hardware LEDC output, 25kHz per Noctua PWM spec  |
+| Fan 1 tach            | GPIO26 | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
+| Fan 2 (inbound) PWM   | GPIO27 | Hardware LEDC output, 25kHz                      |
+| Fan 2 tach            | GPIO32 | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
 
 Pins chosen to avoid ESP32 boot-strapping pins (0, 2, 12, 15) and input-only
 pins (34–39).

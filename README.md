@@ -17,6 +17,14 @@ Breadboard prototype phase. Not yet packaged into an enclosure.
 - UMLIFE AC/DC-to-DC buck converter, adjustable 2.5–35V output, 2A, wide input
   (5–30V AC/DC / 5–48V DC) — set output to 5.0V
 
+## Schematic
+
+[`hardware/schematic.svg`](hardware/schematic.svg) — full electrical diagram.
+[`docs/wiring.md`](docs/wiring.md) has the net-by-net connection table, the
+connector pinouts, the BOM, and the order to bring the board up in.
+
+[![Schematic](hardware/schematic.svg)](hardware/schematic.svg)
+
 ## Pinout (ESP-WROOM-32)
 
 | Signal                | GPIO   | Notes                                            |
@@ -73,20 +81,20 @@ pins (34–39).
 ## Repo layout
 
 ```
-/esphome/icom-2730a-fan-controller.yaml   # this file, moved under /esphome
+/esphome/icom-2730a-fan-controller.yaml   # ESPHome config
 /esphome/secrets.yaml.example
-/hardware/                                 # OpenSCAD enclosure, schematic (TBD)
-/docs/
-  wiring.md                                # this README's wiring section, expanded
-  bom.md
+/hardware/schematic.svg                    # schematic / wiring diagram
+/docs/wiring.md                            # net list, connection table, BOM, bring-up order
 README.md
 .gitignore
 ```
+
+Still to come under `/hardware/`: the OpenSCAD enclosure.
 
 ## TODO
 
 - [ ] Confirm DS18B20 address after first flash
 - [ ] Bench-test fan curve against actual enclosure thermal load
-- [ ] Add reverse-polarity/TVS protection circuit on buck converter input
+- [ ] Build the protection stage (D1/D2/C1) shown dashed on the schematic
 - [ ] Design enclosure (OpenSCAD) once breadboard behavior is validated
 - [ ] Consider stall detection (tach == 0 while PWM > 0) as a fault alert

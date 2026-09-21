@@ -1,0 +1,283 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1880 1200" width="1880" height="1200" font-family="Helvetica, Arial, sans-serif">
+  <title>Radio Case Fan Controller - schematic / wiring diagram</title>
+
+  <defs>
+    <style>
+      .wire   { fill:none; stroke:#334155; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+      .w12v   { fill:none; stroke:#7f1d1d; stroke-width:3;   stroke-linecap:round; stroke-linejoin:round; }
+      .w5v    { fill:none; stroke:#dc2626; stroke-width:3;   stroke-linecap:round; stroke-linejoin:round; }
+      .w33v   { fill:none; stroke:#ea580c; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+      .wgnd   { fill:none; stroke:#0f172a; stroke-width:3;   stroke-linecap:round; stroke-linejoin:round; }
+      .wsig   { fill:none; stroke:#2563eb; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+      .rail5  { fill:none; stroke:#dc2626; stroke-width:4;   stroke-linecap:round; }
+      .railg  { fill:none; stroke:#0f172a; stroke-width:4;   stroke-linecap:round; }
+      .blk    { fill:#f8fafc; stroke:#334155; stroke-width:2.5; }
+      .part   { fill:#ffffff; stroke:#334155; stroke-width:2.5; }
+      .todo   { fill:none; stroke:#94a3b8; stroke-width:1.8; stroke-dasharray:8 6; }
+      .t      { font-size:13px; fill:#0f172a; }
+      .tm     { font-size:12px; fill:#0f172a; font-family:"DejaVu Sans Mono", Menlo, Consolas, monospace; }
+      .ts     { font-size:11px; fill:#475569; }
+      .tss    { font-size:10px; fill:#64748b; }
+      .tb     { font-size:14px; fill:#0f172a; font-weight:bold; }
+      .ttl    { font-size:22px; fill:#0f172a; font-weight:bold; }
+      .lbl5   { font-size:12px; fill:#dc2626; font-weight:bold; }
+      .lbl33  { font-size:12px; fill:#ea580c; font-weight:bold; }
+      .lblg   { font-size:12px; fill:#0f172a; font-weight:bold; }
+      .lblsig { font-size:11px; fill:#2563eb; font-family:"DejaVu Sans Mono", Menlo, Consolas, monospace; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1880" height="1200" fill="#ffffff"/>
+
+  <!-- ================= TITLE ================= -->
+  <text class="ttl" x="40" y="48" font-size="22px" fill="#0f172a" font-weight="bold">Radio Case Fan Controller &#8212; Schematic / Wiring Diagram</text>
+  <text class="ts"  x="40" y="72" font-size="11px" fill="#475569">ESP32 + DS18B20 + 1&#8211;2 &#215; Noctua NF-A4x20 5V PWM &#183; target enclosure: ICOM IC-2730A case &#183; rev A</text>
+
+  <!-- ================= PROTECTION STAGE (TODO) ================= -->
+  <rect class="todo" x="150" y="130" width="294" height="170" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="8 6"/>
+  <text class="tss" x="150" y="123" font-size="10px" fill="#64748b">PROTECTION STAGE &#8212; TODO, not on the breadboard yet</text>
+
+  <!-- J1 input terminal -->
+  <rect class="part" x="50" y="150" width="60" height="100" fill="#ffffff" stroke="#334155" stroke-width="2.5"/>
+  <text class="tb"  x="80"  y="143" text-anchor="middle" font-size="14px" fill="#0f172a" font-weight="bold">J1</text>
+  <text class="tm"  x="97"  y="186" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">+</text>
+  <text class="tm"  x="97"  y="226" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">&#8722;</text>
+  <text class="ts"  x="80"  y="272" text-anchor="middle" font-size="11px" fill="#475569">12 V in</text>
+  <text class="ts"  x="80"  y="288" text-anchor="middle" font-size="11px" fill="#475569">(radio supply)</text>
+
+  <!-- +12 V run: J1+ -> D1 -> D2 node -> C1 node -> U1 IN+ -->
+  <path class="w12v" d="M110,180 L178,180" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="178,167 178,193 205,180" fill="#7f1d1d" stroke="#7f1d1d" stroke-width="2"/>
+  <path class="w12v" d="M205,165 L205,195" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w12v" d="M205,180 L460,180" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="tm"  x="191" y="152" text-anchor="middle" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">D1</text>
+  <text class="tss" x="191" y="212" text-anchor="middle" font-size="10px" fill="#64748b">SS34 3 A</text>
+
+  <!-- J1- down to the power-section ground bus -->
+  <path class="wgnd" d="M110,220 L150,220 L150,320" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- D2 bidirectional TVS (back-to-back zeners, cathode to cathode) -->
+  <path class="w12v" d="M310,180 L310,217" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="294,217 326,217 310,245" fill="#7f1d1d" stroke="#7f1d1d" stroke-width="2"/>
+  <polygon points="294,273 326,273 310,245" fill="#7f1d1d" stroke="#7f1d1d" stroke-width="2"/>
+  <path class="w12v" d="M288,251 L288,245 L332,245 L332,239" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w12v" d="M310,273 L310,320" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="310" cy="180" r="5" fill="#7f1d1d"/>
+  <text class="tm"  x="282" y="238" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">D2</text>
+  <text class="tss" x="282" y="254" text-anchor="end" font-size="10px" fill="#64748b">SMBJ15CA</text>
+  <text class="tss" x="282" y="268" text-anchor="end" font-size="10px" fill="#64748b">bidirectional</text>
+
+  <!-- C1 bulk electrolytic -->
+  <path class="w12v" d="M385,180 L385,230" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w12v" d="M365,230 L405,230" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w12v" d="M367,248 C373,239 397,239 403,248" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w12v" d="M385,248 L385,320" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="385" cy="180" r="5" fill="#7f1d1d"/>
+  <text class="tss" x="361" y="226" text-anchor="end" font-size="10px" fill="#64748b">+</text>
+  <text class="tm"  x="404" y="212" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">C1</text>
+  <text class="tss" x="404" y="228" font-size="10px" fill="#64748b">100 &#181;F</text>
+  <text class="tss" x="404" y="242" font-size="10px" fill="#64748b">50 V</text>
+
+  <!-- ================= U1 BUCK CONVERTER ================= -->
+  <rect class="blk" x="460" y="150" width="180" height="140" fill="#f8fafc" stroke="#334155" stroke-width="2.5"/>
+  <text class="tb"  x="550" y="205" text-anchor="middle" font-size="14px" fill="#0f172a" font-weight="bold">U1 &#183; buck converter</text>
+  <text class="ts"  x="550" y="225" text-anchor="middle" font-size="11px" fill="#475569">adjustable &#8212; trim OUT to 5.00 V</text>
+  <text class="tss" x="468" y="184" font-size="10px" fill="#64748b">IN+</text>
+  <text class="tss" x="468" y="264" font-size="10px" fill="#64748b">IN&#8722;</text>
+  <text class="tss" x="632" y="184" text-anchor="end" font-size="10px" fill="#64748b">OUT+</text>
+  <text class="tss" x="632" y="264" text-anchor="end" font-size="10px" fill="#64748b">OUT&#8722;</text>
+
+  <path class="wgnd" d="M460,260 L430,260 L430,320" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="wgnd" d="M640,260 L670,260 L670,320" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w5v"  d="M640,180 L700,180 L700,380" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- power-section ground bus -->
+  <path class="railg" d="M150,320 L670,320" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="310" cy="320" r="5" fill="#0f172a"/>
+  <circle cx="385" cy="320" r="5" fill="#0f172a"/>
+  <circle cx="430" cy="320" r="5" fill="#0f172a"/>
+
+  <!-- main GND trunk -->
+  <path class="wgnd" d="M670,320 L670,1120" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- ================= +5 V RAIL ================= -->
+  <path class="rail5" d="M700,380 L1700,380" fill="none" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+  <text class="lbl5" x="752" y="370" font-size="12px" fill="#dc2626" font-weight="bold">+5 V</text>
+
+  <!-- ESP32 5 V tap and C3 decoupling -->
+  <path class="w5v" d="M730,380 L730,540 L760,540" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="730" cy="380" r="5" fill="#dc2626"/>
+  <path class="wire" d="M670,450 L695,450 M709,450 L730,450" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="wire" d="M695,436 L695,464" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="wire" d="M709,436 L709,464" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="670" cy="450" r="5" fill="#0f172a"/>
+  <circle cx="730" cy="450" r="5" fill="#dc2626"/>
+  <text class="tss" x="702" y="484" text-anchor="middle" font-size="10px" fill="#64748b">C3 10 &#181;F</text>
+
+  <!-- ================= U2 ESP32 ================= -->
+  <text class="tb" x="870" y="478" text-anchor="middle" font-size="14px" fill="#0f172a" font-weight="bold">U2 &#183; ESP-WROOM-32 DevKitC (38-pin)</text>
+  <rect class="blk" x="760" y="490" width="220" height="520" fill="#f8fafc" stroke="#334155" stroke-width="2.5"/>
+  <text class="ts" x="870" y="976" text-anchor="middle" fill="#94a3b8" font-size="11px">symbol pin order is logical,</text>
+  <text class="ts" x="870" y="992" text-anchor="middle" fill="#94a3b8" font-size="11px">not the physical header order</text>
+
+  <text class="tm" x="770" y="545" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">5V / VIN</text>
+  <text class="tm" x="770" y="625" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GND</text>
+  <path class="wgnd" d="M760,620 L670,620" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="670" cy="620" r="5" fill="#0f172a"/>
+
+  <text class="tm" x="970" y="535" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">3V3</text>
+  <text class="tm" x="970" y="595" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO4</text>
+  <text class="tm" x="970" y="735" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO26</text>
+  <text class="tm" x="970" y="795" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO25</text>
+  <text class="tm" x="970" y="895" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO32</text>
+  <text class="tm" x="970" y="955" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO27</text>
+
+  <!-- ================= SIGNAL / 3V3 RUNS ================= -->
+  <path class="w33v" d="M980,530 L1330,530" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="lbl33" x="1010" y="520" font-size="12px" fill="#ea580c" font-weight="bold">+3.3 V</text>
+
+  <path class="wsig" d="M980,590 L1330,590" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="lblsig" x="1006" y="582" font-size="11px" fill="#2563eb" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">1-WIRE DATA</text>
+
+  <path class="wsig" d="M980,730 L1330,730" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="lblsig" x="1006" y="722" font-size="11px" fill="#2563eb" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">TACH1</text>
+
+  <path class="wsig" d="M980,790 L1330,790" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="lblsig" x="1006" y="782" font-size="11px" fill="#2563eb" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">PWM1  25 kHz</text>
+
+  <path class="wsig" d="M980,890 L1330,890" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="lblsig" x="1006" y="882" font-size="11px" fill="#2563eb" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">TACH2</text>
+
+  <path class="wsig" d="M980,950 L1330,950" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="lblsig" x="1006" y="942" font-size="11px" fill="#2563eb" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">PWM2  25 kHz</text>
+
+  <!-- R1 4k7 DS18B20 pull-up, bridging the 3V3 and DATA runs -->
+  <path class="w33v" d="M1290,530 L1290,546" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect class="part" x="1279" y="546" width="22" height="28" fill="#ffffff" stroke="#334155" stroke-width="2.5"/>
+  <path class="wsig" d="M1290,574 L1290,590" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1290" cy="530" r="5" fill="#ea580c"/>
+  <circle cx="1290" cy="590" r="5" fill="#2563eb"/>
+  <text class="tss" x="1272" y="556" text-anchor="end" font-size="10px" fill="#64748b">R1</text>
+  <text class="tss" x="1272" y="571" text-anchor="end" font-size="10px" fill="#64748b">4.7 k</text>
+
+  <!-- 3V3 distribution down to the tach pull-ups (hops = no connection) -->
+  <path class="w33v" d="M1220,530
+                        L1220,581 A 9,9 0 0,0 1220,599
+                        L1220,721 A 9,9 0 0,0 1220,739
+                        L1220,781 A 9,9 0 0,0 1220,799
+                        L1220,820" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1220" cy="530" r="5" fill="#ea580c"/>
+
+  <!-- R2 10k tach 1 pull-up -->
+  <circle cx="1220" cy="670" r="5" fill="#ea580c"/>
+  <path class="w33v" d="M1220,670 L1270,670 L1270,682" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect class="part" x="1259" y="682" width="22" height="28" fill="#ffffff" stroke="#334155" stroke-width="2.5"/>
+  <path class="wsig" d="M1270,710 L1270,730" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1270" cy="730" r="5" fill="#2563eb"/>
+  <text class="tss" x="1290" y="692" font-size="10px" fill="#64748b">R2</text>
+  <text class="tss" x="1290" y="707" font-size="10px" fill="#64748b">10 k</text>
+
+  <!-- R3 10k tach 2 pull-up -->
+  <path class="w33v" d="M1220,820 L1270,820 L1270,832" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect class="part" x="1259" y="832" width="22" height="28" fill="#ffffff" stroke="#334155" stroke-width="2.5"/>
+  <path class="wsig" d="M1270,860 L1270,890" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1270" cy="890" r="5" fill="#2563eb"/>
+  <text class="tss" x="1290" y="842" font-size="10px" fill="#64748b">R3</text>
+  <text class="tss" x="1290" y="857" font-size="10px" fill="#64748b">10 k</text>
+
+  <!-- ================= DS18B20 ================= -->
+  <rect class="blk" x="1330" y="500" width="240" height="180" fill="#f8fafc" stroke="#334155" stroke-width="2.5"/>
+  <text class="tm"  x="1340" y="535" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">VDD</text>
+  <text x="1340" y="550" fill="#b91c1c" font-size="10px">red</text>
+  <text class="tm"  x="1340" y="595" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">DATA</text>
+  <text x="1340" y="610" fill="#a16207" font-size="10px">yellow</text>
+  <text class="tb"  x="1465" y="585" text-anchor="middle" font-size="14px" fill="#0f172a" font-weight="bold">DS18B20</text>
+  <text class="ts"  x="1465" y="605" text-anchor="middle" font-size="11px" fill="#475569">enclosure temp probe</text>
+  <text class="tss" x="1465" y="623" text-anchor="middle" font-size="10px" fill="#64748b">waterproof, 1 m lead</text>
+  <text class="tm"  x="1560" y="645" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GND</text>
+  <text class="tss" x="1560" y="661" text-anchor="end" font-size="10px" fill="#64748b">black</text>
+  <path class="wgnd" d="M1570,650 L1630,650" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- ================= FAN 1 ================= -->
+  <rect class="blk" x="1330" y="690" width="240" height="140" fill="#f8fafc" stroke="#334155" stroke-width="2.5"/>
+  <text class="tm"  x="1340" y="735" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">3</text>
+  <text class="tm"  x="1340" y="795" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">4</text>
+  <text class="tm"  x="1560" y="725" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">1</text>
+  <text class="tm"  x="1560" y="765" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">2</text>
+  <text class="tb"  x="1455" y="748" text-anchor="middle" font-size="14px" fill="#0f172a" font-weight="bold">FAN 1 &#8212; outbound</text>
+  <text class="ts"  x="1455" y="767" text-anchor="middle" font-size="11px" fill="#475569">Noctua NF-A4x20 5V PWM</text>
+  <text class="tss" x="1455" y="812" text-anchor="middle" font-size="10px" fill="#64748b">1 GND &#183; 2 +5V &#183; 3 TACH &#183; 4 PWM</text>
+  <path class="wgnd" d="M1570,720 L1630,720" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w5v"  d="M1570,760 L1621,760 A 9,9 0 0,0 1639,760 L1700,760" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- ================= FAN 2 ================= -->
+  <rect class="blk" x="1330" y="850" width="240" height="140" fill="#f8fafc" stroke="#334155" stroke-width="2.5"/>
+  <text class="tm"  x="1340" y="895" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">3</text>
+  <text class="tm"  x="1340" y="955" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">4</text>
+  <text class="tm"  x="1560" y="885" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">1</text>
+  <text class="tm"  x="1560" y="925" text-anchor="end" font-size="12px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">2</text>
+  <text class="tb"  x="1455" y="908" text-anchor="middle" font-size="14px" fill="#0f172a" font-weight="bold">FAN 2 &#8212; inbound</text>
+  <text class="ts"  x="1455" y="927" text-anchor="middle" font-size="11px" fill="#475569">optional &#8212; dual-fan mode</text>
+  <text class="tss" x="1455" y="972" text-anchor="middle" font-size="10px" fill="#64748b">1 GND &#183; 2 +5V &#183; 3 TACH &#183; 4 PWM</text>
+  <path class="wgnd" d="M1570,880 L1630,880" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w5v"  d="M1570,920 L1621,920 A 9,9 0 0,0 1639,920 L1700,920" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- ================= RIGHT-HAND POWER COLUMNS ================= -->
+  <path class="w5v"  d="M1700,380 L1700,1030" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="wgnd" d="M1630,650 L1630,1120" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1700" cy="760" r="5" fill="#dc2626"/>
+  <circle cx="1700" cy="920" r="5" fill="#dc2626"/>
+  <circle cx="1630" cy="720" r="5" fill="#0f172a"/>
+  <circle cx="1630" cy="880" r="5" fill="#0f172a"/>
+
+  <!-- C2 bulk cap across the fan rail -->
+  <path class="w5v"  d="M1700,1030 L1679,1030" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="w5v"  d="M1679,1016 L1679,1044" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="wgnd" d="M1663,1016 C1655,1022 1655,1038 1663,1044" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="wgnd" d="M1659,1030 L1630,1030" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1630" cy="1030" r="5" fill="#0f172a"/>
+  <text class="tss" x="1688" y="1012" text-anchor="end" font-size="10px" fill="#64748b">+</text>
+  <text class="tss" x="1652" y="1076" font-size="10px" fill="#64748b">C2 100 &#181;F</text>
+
+  <!-- ================= GND RAIL ================= -->
+  <path class="railg" d="M670,1120 L1630,1120" fill="none" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+  <text class="lblg" x="690" y="1145" font-size="12px" fill="#0f172a" font-weight="bold">GND &#8212; star point at U1 OUT&#8722;</text>
+
+  <!-- ================= LEGEND ================= -->
+  <rect x="40" y="420" width="600" height="130" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text class="tb" x="56" y="446" font-size="14px" fill="#0f172a" font-weight="bold">Legend</text>
+  <path class="w12v" d="M60,470 L100,470" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text class="ts" x="108" y="474" font-size="11px" fill="#475569">12 V in</text>
+  <path class="w5v"  d="M190,470 L230,470" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text class="ts" x="238" y="474" font-size="11px" fill="#475569">+5 V</text>
+  <path class="w33v" d="M300,470 L340,470" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text class="ts" x="348" y="474" font-size="11px" fill="#475569">+3.3 V</text>
+  <path class="wsig" d="M410,470 L450,470" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text class="ts" x="458" y="474" font-size="11px" fill="#475569">signal</text>
+  <path class="wgnd" d="M520,470 L560,470" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text class="ts" x="568" y="474" font-size="11px" fill="#475569">GND</text>
+  <path class="wire" d="M60,516 L110,516" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="85" cy="516" r="5" fill="#334155"/>
+  <text class="ts" x="122" y="520" font-size="11px" fill="#475569">dot = connected</text>
+  <path class="wire" d="M250,532 L250,525 A 9,9 0 0,1 250,507 L250,500" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="wire" d="M226,516 L274,516" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="ts" x="288" y="520" font-size="11px" fill="#475569">hop = crossing, not connected</text>
+
+  <!-- ================= BUILD NOTES ================= -->
+  <rect x="40" y="580" width="600" height="510" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text class="tb" x="56" y="606" font-size="14px" fill="#0f172a" font-weight="bold">Build notes</text>
+  <text class="t" x="56" y="636" font-size="13px" fill="#0f172a">1.</text><text class="t" x="80" y="636" font-size="13px" fill="#0f172a">Trim U1 to 5.00 V on the bench, unloaded, before</text>
+  <text class="t" x="80" y="654" font-size="13px" fill="#0f172a">wiring anything downstream of OUT+.</text>
+  <text class="t" x="56" y="682" font-size="13px" fill="#0f172a">2.</text><text class="t" x="80" y="682" font-size="13px" fill="#0f172a">D1 / D2 / C1 are planned, not yet built. Until they</text>
+  <text class="t" x="80" y="700" font-size="13px" fill="#0f172a">exist, a polarity mistake at J1 kills U1 and the ESP32.</text>
+  <text class="t" x="56" y="728" font-size="13px" fill="#0f172a">3.</text><text class="t" x="80" y="728" font-size="13px" fill="#0f172a">Tach (pin 3) is open-collector: pull up to +3.3 V only.</text>
+  <text class="t" x="80" y="746" font-size="13px" fill="#0f172a">A pull-up to +5 V puts 5 V on a GPIO &#8212; do not do it.</text>
+  <text class="t" x="56" y="774" font-size="13px" fill="#0f172a">4.</text><text class="t" x="80" y="774" font-size="13px" fill="#0f172a">PWM (pin 4) is a 3.3 V push-pull LEDC output at 25 kHz.</text>
+  <text class="t" x="80" y="792" font-size="13px" fill="#0f172a">Noctua 5 V PWM fans accept a 3.3 V control signal.</text>
+  <text class="t" x="56" y="820" font-size="13px" fill="#0f172a">5.</text><text class="t" x="80" y="820" font-size="13px" fill="#0f172a">R2 / R3 are external pull-ups; the ESPHome config also</text>
+  <text class="t" x="80" y="838" font-size="13px" fill="#0f172a">enables INPUT_PULLUP. The internal one (~45 k) alone is</text>
+  <text class="t" x="80" y="856" font-size="13px" fill="#0f172a">weak for the tach edge &#8212; keep the 10 k parts.</text>
+  <text class="t" x="56" y="884" font-size="13px" fill="#0f172a">6.</text><text class="t" x="80" y="884" font-size="13px" fill="#0f172a">Star-ground at U1 OUT&#8722;. Do not daisy-chain fan return</text>
+  <text class="t" x="80" y="902" font-size="13px" fill="#0f172a">current through the ESP32 GND pin.</text>
+  <text class="t" x="56" y="930" font-size="13px" fill="#0f172a">7.</text><text class="t" x="80" y="930" font-size="13px" fill="#0f172a">Current budget: ESP32 ~250 mA avg / ~500 mA Wi-Fi peak,</text>
+  <text class="t" x="80" y="948" font-size="13px" fill="#0f172a">plus ~2 &#215; 120 mA of fan &#8212; well inside U1&#8217;s 2 A.</text>
+  <text class="t" x="56" y="976" font-size="13px" fill="#0f172a">8.</text><text class="t" x="80" y="976" font-size="13px" fill="#0f172a">Fan 2 is optional. In single-fan mode its PWM is held at</text>
+  <text class="t" x="80" y="994" font-size="13px" fill="#0f172a">0 %; leave it unpopulated for passive intake.</text>
+  <text class="t" x="56" y="1022" font-size="13px" fill="#0f172a">9.</text><text class="t" x="80" y="1022" font-size="13px" fill="#0f172a">R1 sits at the probe end of the 1 m lead, across the red</text>
+  <text class="t" x="80" y="1040" font-size="13px" fill="#0f172a">and yellow conductors.</text>
+  <text class="ts" x="56" y="1072" font-size="11px" fill="#475569">See docs/wiring.md for the net-by-net connection table.</text>
+</svg>

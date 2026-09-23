@@ -3,9 +3,10 @@ esphome:
   friendly_name: IC-2730A Case Fan Controller
 
 esp32:
-  board: esp32dev
+  variant: esp32c6
   framework:
-    type: arduino
+    # ESP32-C6 is not supported by the Arduino framework in ESPHome
+    type: esp-idf
 
 logger:
 
@@ -31,13 +32,15 @@ captive_portal:
 # --- Temperature probe (DS18B20 on 1-Wire) ---
 one_wire:
   - platform: gpio
-    pin: GPIO4
+    # J1 header, deliberately on the opposite side of the board from the fan
+    # PWM lines (GPIO18/20 on J3) to keep 25kHz switching noise off the bus
+    pin: GPIO6
     # NOTE: use a 4.7k pull-up resistor between the DS18B20 data line and 3.3V
 
 sensor:
   - platform: dallas_temp
     # TODO: replace with your probe's actual address — check the boot log after
-    # first flash, ESPHome will list any 1-Wire devices it finds on GPIO4
+    # first flash, ESPHome will list any 1-Wire devices it finds on GPIO6
     address: 0x0000000000000000
     name: "Enclosure Temperature"
     id: case_temp
@@ -47,10 +50,13 @@ sensor:
           window_size: 5
           send_every: 5
 
-  # Noctua fans output 2 tach pulses per revolution
+  # Noctua fans output 2 tach pulses per revolution.
+  # If the hardware PCNT peripheral misbehaves on the C6, add `use_pcnt: false`
+  # to fall back to software counting — the tach tops out near 167 Hz
+  # (~5000 RPM x 2 pulses / 60), well within software range.
   - platform: pulse_counter
     pin:
-      number: GPIO26
+      number: GPIO19
       mode: INPUT_PULLUP
     name: "Fan 1 (Outbound) RPM"
     id: fan1_rpm
@@ -60,7 +66,7 @@ sensor:
 
   - platform: pulse_counter
     pin:
-      number: GPIO32
+      number: GPIO21
       mode: INPUT_PULLUP
     name: "Fan 2 (Inbound) RPM"
     id: fan2_rpm
@@ -71,12 +77,12 @@ sensor:
 # --- PWM control lines to fans (hardware LEDC @ 25kHz, per Noctua spec) ---
 output:
   - platform: ledc
-    pin: GPIO25
+    pin: GPIO18
     id: fan1_pwm_out
     frequency: 25000 Hz
 
   - platform: ledc
-    pin: GPIO27
+    pin: GPIO20
     id: fan2_pwm_out
     frequency: 25000 Hz
 
@@ -126,7 +132,7 @@ interval:
     then:
       - lambda: |-
           float t = id(case_temp).state;
-          if (isnan(t)) return;
+          if (std::isnan(t)) return;
 
           float lo = id(min_temp_c).state;
           float hi = id(max_temp_c).state;

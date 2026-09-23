@@ -30,7 +30,7 @@
 
   <!-- ================= TITLE ================= -->
   <text class="ttl" x="40" y="48" font-size="24px" fill="#0f172a" font-weight="bold">Radio Case Fan Controller &#8212; Schematic / Wiring Diagram</text>
-  <text class="ts"  x="40" y="74" font-size="13px" fill="#1e293b">ESP32 + DS18B20 + 1&#8211;2 &#215; Noctua NF-A4x20 5V PWM &#183; ICOM IC-2730A case &#183; rev A</text>
+  <text class="ts"  x="40" y="74" font-size="13px" fill="#1e293b">ESP32-C6 + DS18B20 + 1&#8211;2 &#215; Noctua NF-A4x20 5V PWM &#183; ICOM IC-2730A case &#183; rev B</text>
   <text class="ts"  x="40" y="96" font-size="13px" fill="#1e293b">Connection table, BOM, bring-up order and gotchas: docs/wiring.md</text>
 
   <!-- ================= PROTECTION STAGE (TODO) ================= -->
@@ -118,22 +118,22 @@
   <text class="tss" x="85" y="503" text-anchor="middle" font-size="12px" fill="#334155">10 &#181;F</text>
 
   <!-- ================= U2 ESP32 ================= -->
-  <text class="tb" x="260" y="478" text-anchor="middle" font-size="16px" fill="#0f172a" font-weight="bold">U2 &#183; ESP-WROOM-32 DevKitC</text>
+  <text class="tb" x="260" y="478" text-anchor="middle" font-size="16px" fill="#0f172a" font-weight="bold">U2 &#183; ESP32-C6-DevKitC-1</text>
   <rect class="blk" x="150" y="490" width="220" height="520" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/>
   <text class="tss" x="260" y="982" text-anchor="middle" font-size="12px" fill="#334155">symbol pin order is logical,</text>
   <text class="tss" x="260" y="998" text-anchor="middle" font-size="12px" fill="#334155">not the physical header order</text>
 
-  <text class="tm" x="160" y="546" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">5V / VIN</text>
+  <text class="tm" x="160" y="546" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">5V</text>
   <text class="tm" x="160" y="626" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GND</text>
   <path class="wgnd" d="M150,620 L60,620" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
   <circle cx="60" cy="620" r="5.5" fill="#0f172a"/>
 
   <text class="tm" x="360" y="536" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">3V3</text>
-  <text class="tm" x="360" y="596" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO4</text>
-  <text class="tm" x="360" y="736" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO26</text>
-  <text class="tm" x="360" y="796" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO25</text>
-  <text class="tm" x="360" y="896" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO32</text>
-  <text class="tm" x="360" y="956" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO27</text>
+  <text class="tm" x="360" y="596" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO6</text>
+  <text class="tm" x="360" y="736" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO19</text>
+  <text class="tm" x="360" y="796" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO18</text>
+  <text class="tm" x="360" y="896" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO21</text>
+  <text class="tm" x="360" y="956" text-anchor="end" font-size="14px" fill="#0f172a" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">GPIO20</text>
 
   <!-- ================= SIGNAL / 3V3 RUNS ================= -->
   <path class="w33v" d="M370,530 L720,530" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -155,13 +155,13 @@
   <text class="lblsig" x="398" y="941" font-size="13px" fill="#1d4ed8" font-family="'DejaVu Sans Mono', Menlo, Consolas, monospace">PWM2 25 kHz</text>
 
   <!-- R1 4k7 DS18B20 pull-up, bridging the 3V3 and DATA runs -->
-  <path class="w33v" d="M680,530 L680,546" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect class="part" x="669" y="546" width="22" height="28" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
-  <path class="wsig" d="M680,574 L680,590" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="680" cy="530" r="5.5" fill="#ea580c"/>
-  <circle cx="680" cy="590" r="5.5" fill="#2563eb"/>
-  <text class="tss" x="661" y="557" text-anchor="end" font-size="12px" fill="#334155">R1</text>
-  <text class="tss" x="661" y="572" text-anchor="end" font-size="12px" fill="#334155">4.7 k</text>
+  <path class="w33v" d="M520,530 L520,546" fill="none" stroke="#ea580c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect class="part" x="509" y="546" width="22" height="28" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
+  <path class="wsig" d="M520,574 L520,590" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="520" cy="530" r="5.5" fill="#ea580c"/>
+  <circle cx="520" cy="590" r="5.5" fill="#2563eb"/>
+  <text class="tss" x="539" y="557" font-size="12px" fill="#334155">R1</text>
+  <text class="tss" x="539" y="572" font-size="12px" fill="#334155">4.7 k</text>
 
   <!-- 3V3 distribution down to the tach pull-ups (hops = no connection) -->
   <path class="w33v" d="M610,530

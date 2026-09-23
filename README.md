@@ -11,7 +11,7 @@ Breadboard prototype phase. Not yet packaged into an enclosure.
 
 ## Hardware on hand
 
-- ESP-WROOM-32 dev board (ESP32-S, 38-pin)
+- ESP32-C6-DevKitC-1 (ESP32-C6-WROOM-1 module, RISC-V, 2×16 headers)
 - HiLetgo DS18B20 waterproof temperature probe (1-Wire, stainless steel, 1m)
 - Noctua NF-A4x20 5V PWM fan(s)
 - UMLIFE AC/DC-to-DC buck converter, adjustable 2.5–35V output, 2A, wide input
@@ -25,35 +25,41 @@ connector pinouts, the BOM, and the order to bring the board up in.
 
 [![Schematic](hardware/schematic.svg)](hardware/schematic.svg)
 
-## Pinout (ESP-WROOM-32)
+## Pinout (ESP32-C6-DevKitC-1)
 
-| Signal                | GPIO   | Notes                                            |
-| --------------------- | ------ | ------------------------------------------------ |
-| DS18B20 data (1-Wire) | GPIO4  | 4.7kΩ pull-up to 3.3V between data and VCC       |
-| Fan 1 (outbound) PWM  | GPIO25 | Hardware LEDC output, 25kHz per Noctua PWM spec  |
-| Fan 1 tach            | GPIO26 | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
-| Fan 2 (inbound) PWM   | GPIO27 | Hardware LEDC output, 25kHz                      |
-| Fan 2 tach            | GPIO32 | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
+| Signal                | GPIO   | Header | Notes                                            |
+| --------------------- | ------ | ------ | ------------------------------------------------ |
+| DS18B20 data (1-Wire) | GPIO6  | J1     | 4.7kΩ pull-up to 3.3V between data and VCC       |
+| Fan 1 (outbound) PWM  | GPIO18 | J3     | Hardware LEDC output, 25kHz per Noctua PWM spec  |
+| Fan 1 tach            | GPIO19 | J3     | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
+| Fan 2 (inbound) PWM   | GPIO20 | J3     | Hardware LEDC output, 25kHz                      |
+| Fan 2 tach            | GPIO21 | J3     | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
 
-Pins chosen to avoid ESP32 boot-strapping pins (0, 2, 12, 15) and input-only
-pins (34–39).
+Pins chosen to avoid the C6 strapping pins (4, 5, 8, 9, 15 — 8 also drives the
+onboard RGB LED, 9 is the BOOT button, 15 has no internal pull), the USB
+Serial/JTAG pair (12, 13), and the UART0 pins wired to the USB bridge (16, 17).
+GPIO14 is not broken out, and GPIO24–30 are consumed by the SPI flash bus.
+
+The four fan signals sit as a contiguous block on J3 while the 1-Wire probe is
+on J1, putting it on the physically opposite side of the board from the 25kHz
+PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11, 22, 23.
 
 ## Power wiring
 
 - Radio supply (12V nominal, wide tolerance) → reverse-polarity protection
   (series diode or P-MOSFET) → buck converter input
-- Buck converter output trimmed to **5.0V** → ESP32 `5V`/`VIN` pin (onboard
+- Buck converter output trimmed to **5.0V** → DevKit `5V` pin (onboard
   regulator drops to 3.3V for the MCU) and both fans' 5V pins, in parallel
-- Common ground across buck converter output, ESP32, and both fans
+- Common ground across buck converter output, the DevKit, and both fans
 - The buck converter module itself has no advertised input protection —
   don't rely on it for reverse-polarity or surge handling; add that upstream
 
 ## Fan PWM/tach notes
 
-- Noctua 4-pin fans expect ~25kHz on the PWM control line; ESP32's hardware
-  `LEDC` peripheral hits this natively (this is why ESP32 over ESP8266 for
-  this module — ESP8266's software PWM can't cleanly reach 25kHz and tends
-  to produce audible whine)
+- Noctua 4-pin fans expect ~25kHz on the PWM control line; the ESP32-C6's
+  hardware `LEDC` peripheral hits this natively at ~11-bit resolution (this is
+  why an ESP32-class part over an ESP8266 — ESP8266's software PWM can't
+  cleanly reach 25kHz and tends to produce audible whine)
 - Tach line is open-collector: it only pulls low, never drives high, so a
   simple pull-up to 3.3V is safe — no level shifting needed
 - Fans report 2 tach pulses per revolution; the ESPHome config's

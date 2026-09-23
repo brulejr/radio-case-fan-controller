@@ -12,12 +12,12 @@ Seven nets total. Everything in the module is one of these.
 | Net        | Carries                    | Members                                                                 |
 | ---------- | -------------------------- | ----------------------------------------------------------------------- |
 | `+12V_IN`  | radio supply, unregulated  | J1 `+` → D1 anode; D1 cathode → D2, C1 `+`, U1 `IN+`                     |
-| `+5V`      | regulated, 5.00 V          | U1 `OUT+` → ESP32 `5V/VIN`, C3 `+`, Fan 1 pin 2, Fan 2 pin 2, C2 `+`     |
-| `+3V3`     | ESP32 onboard regulator    | ESP32 `3V3` → DS18B20 red, R1, R2, R3                                    |
-| `GND`      | common return              | J1 `−`, D2, C1 `−`, U1 `IN−`/`OUT−`, ESP32 `GND`, C2/C3 `−`, DS18B20 black, Fan 1 pin 1, Fan 2 pin 1 |
-| `1W_DATA`  | DS18B20 1-Wire bus         | ESP32 `GPIO4` ↔ DS18B20 yellow, R1 to `+3V3`                             |
-| `TACH1/2`  | fan speed, open-collector  | ESP32 `GPIO26` ↔ Fan 1 pin 3 (R2 to `+3V3`); `GPIO32` ↔ Fan 2 pin 3 (R3) |
-| `PWM1/2`   | 25 kHz fan control         | ESP32 `GPIO25` → Fan 1 pin 4; `GPIO27` → Fan 2 pin 4                     |
+| `+5V`      | regulated, 5.00 V          | U1 `OUT+` → MCU `5V`, C3 `+`, Fan 1 pin 2, Fan 2 pin 2, C2 `+`     |
+| `+3V3`     | MCU onboard regulator      | MCU `3V3` → DS18B20 red, R1, R2, R3                                    |
+| `GND`      | common return              | J1 `−`, D2, C1 `−`, U1 `IN−`/`OUT−`, MCU `GND`, C2/C3 `−`, DS18B20 black, Fan 1 pin 1, Fan 2 pin 1 |
+| `1W_DATA`  | DS18B20 1-Wire bus         | MCU `GPIO6` ↔ DS18B20 yellow, R1 to `+3V3`                               |
+| `TACH1/2`  | fan speed, open-collector  | MCU `GPIO19` ↔ Fan 1 pin 3 (R2 to `+3V3`); `GPIO21` ↔ Fan 2 pin 3 (R3)   |
+| `PWM1/2`   | 25 kHz fan control         | MCU `GPIO18` → Fan 1 pin 4; `GPIO20` → Fan 2 pin 4                       |
 
 ## Connection table
 
@@ -36,32 +36,38 @@ Build from this. Each row is one wire.
 
 D1 / D2 / C1 are the protection stage and are **not on the breadboard yet**
 (dashed on the schematic). Until they exist, reversing J1 destroys U1 and the
-ESP32. For bench work, feed the breadboard from a current-limited supply.
+MCU. For bench work, feed the board from a current-limited supply.
 
 ### 5 V distribution
 
 | From      | To               | Notes                                                    |
 | --------- | ---------------- | -------------------------------------------------------- |
-| U1 `OUT+` | ESP32 `5V`/`VIN` | trim U1 to 5.00 V **before** this wire goes in           |
+| U1 `OUT+` | MCU `5V`         | trim U1 to 5.00 V **before** this wire goes in           |
 | U1 `OUT+` | Fan 1 pin 2      | yellow on the Noctua connector                           |
 | U1 `OUT+` | Fan 2 pin 2      | omit if running single-fan                               |
-| U1 `OUT−` | ESP32 `GND`      | star point — see the grounding note below                |
+| U1 `OUT−` | MCU `GND`        | star point — see the grounding note below                |
 | U1 `OUT−` | Fan 1 pin 1      | black                                                    |
 | U1 `OUT−` | Fan 2 pin 1      |                                                           |
-| C3        | across `+5V`/`GND` at the ESP32 | 10 µF, keep the leads short             |
+| C3        | across `+5V`/`GND` at the MCU   | 10 µF, keep the leads short             |
 | C2        | across `+5V`/`GND` at the fans  | 100 µF, damps fan start-up inrush       |
 
 ### Signals
 
-| ESP32 pin | To                  | Passive                     | Notes                                      |
-| --------- | ------------------- | --------------------------- | ------------------------------------------- |
-| `GPIO4`   | DS18B20 yellow      | R1 4.7 kΩ to `+3V3`         | 1-Wire data; R1 sits at the probe end       |
-| `GPIO25`  | Fan 1 pin 4 (blue)  | —                           | LEDC PWM, 25 kHz                            |
-| `GPIO26`  | Fan 1 pin 3 (green) | R2 10 kΩ to `+3V3`          | tach, open-collector                        |
-| `GPIO27`  | Fan 2 pin 4 (blue)  | —                           | LEDC PWM, 25 kHz                            |
-| `GPIO32`  | Fan 2 pin 3 (green) | R3 10 kΩ to `+3V3`          | tach, open-collector                        |
-| `3V3`     | DS18B20 red         | —                           | also feeds R1 / R2 / R3                     |
-| `GND`     | DS18B20 black       | —                           |                                              |
+| MCU pin  | Header | To                  | Passive             | Notes                        |
+| -------- | ------ | ------------------- | ------------------- | ----------------------------- |
+| `GPIO6`  | J1     | DS18B20 yellow      | R1 4.7 kΩ to `+3V3` | 1-Wire data                   |
+| `GPIO18` | J3     | Fan 1 pin 4 (blue)  | —                   | LEDC PWM, 25 kHz              |
+| `GPIO19` | J3     | Fan 1 pin 3 (green) | R2 10 kΩ to `+3V3`  | tach, open-collector          |
+| `GPIO20` | J3     | Fan 2 pin 4 (blue)  | —                   | LEDC PWM, 25 kHz              |
+| `GPIO21` | J3     | Fan 2 pin 3 (green) | R3 10 kΩ to `+3V3`  | tach, open-collector          |
+| `3V3`    | —      | DS18B20 red         | —                   | also feeds R1 / R2 / R3       |
+| `GND`    | —      | DS18B20 black       | —                   |                               |
+
+R1, R2 and R3 all live on the carrier board next to the MCU socket, not out at
+the sensor or fan. At these cable lengths the pull-up position makes no
+measurable difference to the bus, and keeping them on the board means the
+probe and fans are plain pluggable assemblies with no components buried in a
+cable run.
 
 ## Connector pinouts
 
@@ -71,8 +77,8 @@ ESP32. For bench work, feed the breadboard from a current-limited supply.
 | --- | ------ | -------- | --------------------------------- |
 | 1   | black  | GND      | `GND`                             |
 | 2   | yellow | +5 V     | `+5V`                             |
-| 3   | green  | tach     | GPIO26 / GPIO32, pulled to +3.3 V |
-| 4   | blue   | PWM in   | GPIO25 / GPIO27                   |
+| 3   | green  | tach     | GPIO19 / GPIO21, pulled to +3.3 V |
+| 4   | blue   | PWM in   | GPIO18 / GPIO20                   |
 
 **DS18B20 waterproof probe**: red = VDD, yellow = data, black = GND. Some
 batches ship red/white/black — white is then the data line. Meter it before you
@@ -80,20 +86,29 @@ trust the colours.
 
 ## Which side of the board
 
-On a typical ESP32 DevKitC v4 38-pin, with the USB connector at the bottom:
+The ESP32-C6-DevKitC-1 has two 16-pin headers, J1 and J3:
 
-- **Left header**: `3V3`, `GPIO32`, `GPIO25`, `GPIO26`, `GPIO27`, `GND`, `5V`
-- **Right header**: `GPIO4`
+- **J1**: `GPIO6` (1-Wire probe), plus `3V3`, `5V` and `GND`
+- **J3**: `GPIO18`, `GPIO19`, `GPIO20`, `GPIO21` (the four fan signals)
 
-So everything except the DS18B20 data line lands on one side of the board. The
-schematic groups pins by function instead, so its pin order does not match the
-physical header — go by pin name, and verify against your board's silkscreen,
-since clone layouts vary.
+The split is deliberate. The fan signals sit together on J3 so they route as a
+block on the carrier board, and the 1-Wire probe is on J1, the opposite edge —
+the 25 kHz PWM edges are the noisiest thing on the board and the 1-Wire bus,
+pulled up through 4.7 kΩ over a metre of cable, is the most susceptible.
+
+The schematic groups pins by function rather than physical position, so its pin
+order does not match the header — go by pin name, and verify against your
+board's silkscreen.
+
+**Do not use** GPIO4, 5, 8, 9 or 15 (strapping; 8 drives the onboard RGB LED, 9
+is the BOOT button, 15 has no internal pull resistor), GPIO12/13 (USB
+Serial/JTAG) or GPIO16/17 (UART0 to the USB bridge). GPIO14 is not broken out
+and GPIO24–30 are the SPI flash bus.
 
 ## Grounding
 
-Star-ground at `U1 OUT−`. Run separate returns from there to the ESP32 and to
-each fan rather than daisy-chaining fan current through the ESP32's `GND` pin —
+Star-ground at `U1 OUT−`. Run separate returns from there to the MCU and to
+each fan rather than daisy-chaining fan current through the MCU's `GND` pin —
 a fan's start-up surge across shared ground wire shows up as a rail dip at the
 MCU, and on a breadboard the contact resistance makes that worse than it sounds.
 
@@ -101,8 +116,8 @@ MCU, and on a breadboard the contact resistance makes that worse than it sounds.
 
 1. With nothing connected to `OUT+`, power U1 and trim its pot until a meter
    reads 5.00 V. Do this first, every time — these modules ship set anywhere in
-   their range, and 35 V into the ESP32's `5V` pin ends the session.
-2. Power down. Wire `OUT+`/`OUT−` to the ESP32 only. Power up, confirm the board
+   their range, and 35 V into the DevKit's `5V` pin ends the session.
+2. Power down. Wire `OUT+`/`OUT−` to the DevKit only. Power up, confirm the board
    enumerates and the 3V3 pin reads ~3.3 V.
 3. Add the DS18B20 and R1. Flash, and read the boot log for the 1-Wire address.
 4. Add Fan 1, R2, C2. Confirm PWM response and a plausible RPM reading.
@@ -113,21 +128,23 @@ MCU, and on a breadboard the contact resistance makes that worse than it sounds.
 | Ref       | Part                               | Qty | Notes                                     |
 | --------- | ---------------------------------- | --- | ----------------------------------------- |
 | U1        | adjustable buck converter, 2 A     | 1   | UMLIFE module on hand; set to 5.00 V      |
-| U2        | ESP-WROOM-32 DevKitC, 38-pin       | 1   |                                            |
+| U2        | ESP32-C6-DevKitC-1 (C6-WROOM-1)    | 1   | 2×16 headers; socket it, don't solder down |
 | —         | DS18B20 waterproof probe, 1 m      | 1   | HiLetgo                                    |
 | Fan 1/2   | Noctua NF-A4x20 5V PWM             | 1–2 | Fan 2 optional                             |
 | R1        | 4.7 kΩ resistor                    | 1   | 1-Wire pull-up                             |
 | R2, R3    | 10 kΩ resistor                     | 1–2 | tach pull-ups, one per fan                 |
 | C1        | 100 µF / 50 V electrolytic         | 1   | protection stage, TODO                     |
 | C2        | 100 µF / 16 V electrolytic         | 1   | 5 V bulk at the fans                       |
-| C3        | 10 µF ceramic or electrolytic      | 1   | 5 V decoupling at the ESP32                |
+| C3        | 10 µF ceramic or electrolytic      | 1   | 5 V decoupling at the MCU                  |
 | D1        | SS34 Schottky, 3 A                 | 1   | reverse-polarity, TODO                     |
 | D2        | SMBJ15CA bidirectional TVS         | 1   | surge clamp, TODO                          |
 | J1        | 2-pos screw terminal / Powerpole   | 1   | supply entry                               |
 
-Current budget: ESP32 ~250 mA average with Wi-Fi up, ~500 mA on transmit peaks,
-plus roughly 120 mA per fan at full speed — call it 0.8 A worst case against
-U1's 2 A rating.
+Current budget: the C6 module draws on the order of 100 mA average with Wi-Fi
+up and a few hundred mA on transmit peaks, plus roughly 120 mA per fan at full
+speed. Budgeting 0.8 A worst case against U1's 2 A leaves ample margin. These
+are working estimates for headroom, not datasheet figures — check them against
+the module datasheet before trimming U1's rating.
 
 ## Gotchas
 
@@ -137,7 +154,7 @@ U1's 2 A rating.
 - The ESPHome config also sets `INPUT_PULLUP` on the tach pins. That's belt and
   braces — the internal pull-up is ~45 kΩ, weak enough that a long fan lead can
   round the edge off. Keep the external 10 kΩ parts.
-- PWM is driven push-pull at 3.3 V from the ESP32's LEDC peripheral. Noctua's
+- PWM is driven push-pull at 3.3 V from the C6's LEDC peripheral. Noctua's
   5 V PWM fans accept a 3.3 V control signal, so no level shifter is needed.
 - Fan behaviour below ~20 % duty is not specified by the 4-wire standard. The
   config's `min_duty` default of 30 % exists for this reason. Separately, at 0 %

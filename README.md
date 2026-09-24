@@ -7,15 +7,15 @@ passive intake) or two (matched outbound + inbound), switchable in software.
 
 ## Status
 
-Breadboard prototype phase. Not yet packaged into an enclosure.
+Breadboard prototype phase in the lab. The finished unit is a **carrier board**
+— prototype board first, then a custom PCB — not a breadboard.
 
 ## Hardware on hand
 
-- ESP32-C6-DevKitC-1 (ESP32-C6-WROOM-1 module, RISC-V, 2×16 headers)
+- ESP32-C6-WROOM-1 dev board (RISC-V, 2×15 headers, dual USB-C)
 - HiLetgo DS18B20 waterproof temperature probe (1-Wire, stainless steel, 1m)
 - Noctua NF-A4x20 5V PWM fan(s)
-- UMLIFE AC/DC-to-DC buck converter, adjustable 2.5–35V output, 2A, wide input
-  (5–30V AC/DC / 5–48V DC) — set output to 5.0V
+- Buck converter with a **USB-C output** — exact part TBC, see `docs/wiring.md`
 
 ## Schematic
 
@@ -25,34 +25,40 @@ connector pinouts, the BOM, and the order to bring the board up in.
 
 [![Schematic](hardware/schematic.svg)](hardware/schematic.svg)
 
-## Pinout (ESP32-C6-DevKitC-1)
+## Pinout (ESP32-C6-WROOM-1 dev board)
 
-| Signal                | GPIO   | Header | Notes                                            |
+| Signal                | GPIO   | Side   | Notes                                            |
 | --------------------- | ------ | ------ | ------------------------------------------------ |
-| DS18B20 data (1-Wire) | GPIO6  | J1     | 4.7kΩ pull-up to 3.3V between data and VCC       |
-| Fan 1 (outbound) PWM  | GPIO18 | J3     | Hardware LEDC output, 25kHz per Noctua PWM spec  |
-| Fan 1 tach            | GPIO19 | J3     | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
-| Fan 2 (inbound) PWM   | GPIO20 | J3     | Hardware LEDC output, 25kHz                      |
-| Fan 2 tach            | GPIO21 | J3     | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
+| DS18B20 data (1-Wire) | GPIO6  | Left   | 4.7kΩ pull-up to 3.3V between data and VCC       |
+| Fan 1 (outbound) PWM  | GPIO18 | Right  | Hardware LEDC output, 25kHz per Noctua PWM spec  |
+| Fan 1 tach            | GPIO19 | Right  | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
+| Fan 2 (inbound) PWM   | GPIO20 | Right  | Hardware LEDC output, 25kHz                      |
+| Fan 2 tach            | GPIO21 | Right  | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
 
 Pins chosen to avoid the C6 strapping pins (4, 5, 8, 9, 15 — 8 also drives the
 onboard RGB LED, 9 is the BOOT button, 15 has no internal pull), the USB
 Serial/JTAG pair (12, 13), and the UART0 pins wired to the USB bridge (16, 17).
 GPIO14 is not broken out, and GPIO24–30 are consumed by the SPI flash bus.
 
-The four fan signals sit as a contiguous block on J3 while the 1-Wire probe is
-on J1, putting it on the physically opposite side of the board from the 25kHz
-PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11, 22, 23.
+The four fan signals sit as a contiguous block on the right header while the
+1-Wire probe is on the left, putting it on the physically opposite side of the
+board from the 25kHz PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11,
+22, 23.
 
 ## Power wiring
 
-- Radio supply (12V nominal, wide tolerance) → reverse-polarity protection
-  (series diode or P-MOSFET) → buck converter input
-- Buck converter output trimmed to **5.0V** → DevKit `5V` pin (onboard
-  regulator drops to 3.3V for the MCU) and both fans' 5V pins, in parallel
-- Common ground across buck converter output, the DevKit, and both fans
-- The buck converter module itself has no advertised input protection —
-  don't rely on it for reverse-polarity or surge handling; add that upstream
+- Radio supply (12V nominal, wide tolerance) → buck converter input, direct.
+  No protection components by design — the box is fed from a battery or bench
+  supply, which handle surge and reverse polarity at the source
+- The buck's only output is **USB-C**, so 5V reaches the board through a USB-C
+  cable into one of the dev board's two ports
+- Both fans take 5V and GND from the dev board's header pins — so **fan power
+  depends on the dev board**. See the power topology section of
+  [`docs/wiring.md`](docs/wiring.md) for what that implies
+- **One power source at a time**: the buck and both USB-C ports share a net.
+  Don't leave the buck connected while a computer is plugged in
+- No bulk or decoupling caps on the 5V rail; 4-pin PWM fans don't chop their
+  supply current, and the dev board has its own input decoupling
 
 ## Fan PWM/tach notes
 
@@ -64,6 +70,10 @@ PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11, 22, 23.
   simple pull-up to 3.3V is safe — no level shifting needed
 - Fans report 2 tach pulses per revolution; the ESPHome config's
   `pulse_counter` filter accounts for this
+- **No PWM signal means full speed**, not stopped — the fan pulls its control
+  input high internally. Expect a spin-up if you unplug a PWM line while the
+  fan is powered
+- Each fan draws 0.1A / 0.5W at full speed (Noctua spec)
 
 ## Software
 
@@ -101,6 +111,5 @@ Still to come under `/hardware/`: the OpenSCAD enclosure.
 
 - [ ] Confirm DS18B20 address after first flash
 - [ ] Bench-test fan curve against actual enclosure thermal load
-- [ ] Build the protection stage (D1/D2/C1) shown dashed on the schematic
 - [ ] Design enclosure (OpenSCAD) once breadboard behavior is validated
 - [ ] Consider stall detection (tach == 0 while PWM > 0) as a fault alert

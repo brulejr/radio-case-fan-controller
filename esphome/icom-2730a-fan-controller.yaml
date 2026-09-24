@@ -22,6 +22,11 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
+  # Default is 15min: ESPHome reboots when WiFi can't be reached. Cooling stops
+  # while the board reboots, and the fans are powered through it — so cooling
+  # must not depend on the network being present.
+  reboot_timeout: 0s
+
   # Fallback hotspot if WiFi is unavailable (e.g. field deployment, no AP)
   ap:
     ssid: "Icom-2730A-Fan-Fallback"

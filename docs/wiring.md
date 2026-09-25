@@ -104,6 +104,13 @@ drives the fan's internal commutation, so there's little for a bulk cap to do.
 | `3V3`    | Left  | DS18B20 red         | —                   | also feeds R1/R2/R3   |
 | `GND`    | Either| DS18B20 black       | —                   |                       |
 
+> **R1, R2 and R3 all go to `+3V3`, never to `+5V`.** The fan's tach transistor
+> only pulls low — the pull-up alone sets the high level, so a pull-up on the
+> 5 V rail puts 5 V onto a 3.3 V GPIO whose absolute maximum is 3.6 V. The fan
+> still appears to work and the only symptom is a tach that reads a flat
+> `0.00 RPM`, so this fails silently. Check the resistor's upper end lands on
+> the dev board's `3V3` pin before first power-up.
+
 R1, R2 and R3 all live on the carrier board next to the dev board, not out at
 the sensor or fan. At these cable lengths the pull-up position makes no
 measurable difference, and keeping them on the board means the probe and fans
@@ -253,7 +260,13 @@ inside any 2 A buck.
 - PWM is driven push-pull at 3.3 V from the C6's LEDC peripheral. Noctua's 5 V
   PWM fans accept a 3.3 V control signal, so no level shifter is needed.
 - Fan behaviour below ~20 % duty is not specified by the 4-wire standard. The
-  config's `min_duty` default of 30 % exists for this reason. Separately, at 0 %
-  duty some Noctua fans coast at minimum RPM rather than stopping — if Fan 2
-  keeps turning in single-fan mode, that's why, and cutting its +5 V is the only
-  reliable way to stop it.
+  config's `min_duty` default of 30 % exists for this reason. **The NF-A4x20 5V
+  PWM does stop at 0 % duty** — verified on the bench, so single-fan mode really
+  does leave Fan 2 stationary rather than idling.
+- **If a fan runs constantly and its RPM reads a flat `0.00`, suspect PWM and
+  tach swapped.** With the PWM line open the fan's internal pull-up holds it at
+  100 %, and the pulse counter sits on a static line with no edges — so the fan
+  appears to run at a "low level" (a 40 mm Noctua is only ~18 dB(A) flat out)
+  and never responds to duty changes. Verify by **wire colour, not pin number**:
+  blue is PWM, green is tach. Pin numbering is exactly what's in doubt when this
+  happens.

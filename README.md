@@ -77,7 +77,7 @@ board from the 25kHz PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11,
 
 ## Software
 
-`icom-2730a-fan-controller.yaml` — ESPHome config. Key behavior:
+`icom2370a-fan-controller.yaml` — ESPHome config. Key behavior:
 
 - DS18B20 reading drives a linear PWM ramp between a configurable min/max
   temperature (exposed as tunable `number` entities, not hardcoded)
@@ -85,6 +85,9 @@ board from the 25kHz PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11,
   Fan 1 (outbound) runs, Fan 2 output held at 0% for passive-intake mode
 - Fallback WiFi AP + local API so the module stays controllable if the
   field WiFi network isn't up
+- Local web UI at `http://<device-ip>/` for the sensors, fan-curve numbers and
+  Dual Fan Mode switch, with its assets embedded in flash so it works with no
+  internet. Needs `web_server_username` / `web_server_password` in `secrets.yaml`
 
 ### First flash
 
@@ -97,7 +100,7 @@ board from the 25kHz PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11,
 ## Repo layout
 
 ```
-/esphome/icom-2730a-fan-controller.yaml   # ESPHome config
+/esphome/icom2370a-fan-controller.yaml    # ESPHome config
 /esphome/secrets.yaml.example
 /hardware/schematic.svg                    # schematic / wiring diagram
 /docs/wiring.md                            # net list, connection table, BOM, bring-up order

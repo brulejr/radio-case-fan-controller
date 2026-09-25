@@ -1,6 +1,13 @@
 esphome:
-  name: icom-2730a-fan-controller
+  name: icom2370a-fan-controller
   friendly_name: IC-2730A Case Fan Controller
+
+  # Stamps a firmware version into the build. Exposed via the logger, mDNS and
+  # the API's device_info, so Home Assistant shows which build is on the board.
+  # Bump this whenever you flash a meaningful change.
+  project:
+    name: "brulejr.radio-case-fan-controller"
+    version: "0.1.0"
 
 esp32:
   variant: esp32c6
@@ -34,6 +41,20 @@ wifi:
 
 captive_portal:
 
+# Local control page at http://<device-ip>/ — sensors, the fan-curve numbers and
+# the Dual Fan Mode switch, without needing Home Assistant.
+#
+# local: true embeds the CSS/JS in flash. By default they're fetched from
+# oi.esphome.io, which would leave the page broken in a field deployment with no
+# internet — exactly the case this box is built for.
+web_server:
+  port: 80
+  version: 2
+  local: true
+  auth:
+    username: !secret web_server_username
+    password: !secret web_server_password
+
 # --- Temperature probe (DS18B20 on 1-Wire) ---
 one_wire:
   - platform: gpio
@@ -56,28 +77,40 @@ sensor:
           send_every: 5
 
   # Noctua fans output 2 tach pulses per revolution.
-  # If the hardware PCNT peripheral misbehaves on the C6, add `use_pcnt: false`
-  # to fall back to software counting — the tach tops out near 167 Hz
-  # (~5000 RPM x 2 pulses / 60), well within software range.
+  #
+  # use_pcnt: false was added while chasing a flat 0.00 pulses/min, which turned
+  # out to be PWM and tach swapped at the fan connectors — the tach line never
+  # carried a signal, so the hardware PCNT path was never actually proven
+  # faulty. Kept because software edge counting is more than adequate here: the
+  # tach tops out near 167 Hz (~5000 RPM x 2 pulses / 60). Drop it if you want
+  # to retest the hardware counter.
   - platform: pulse_counter
     pin:
       number: GPIO19
       mode: INPUT_PULLUP
+    use_pcnt: false
+    # 10s while bringing the tach up; 60s is fine once it's trusted
+    update_interval: 10s
     name: "Fan 1 (Outbound) RPM"
     id: fan1_rpm
     unit_of_measurement: "RPM"
     filters:
-      - multiply: 30.0 # (pulses/min) / 2 pulses-per-rev
+      # pulse_counter reports pulses/min, and the fan gives 2 pulses per
+      # revolution, so RPM = pulses/min / 2.
+      - multiply: 0.5
 
   - platform: pulse_counter
     pin:
       number: GPIO21
       mode: INPUT_PULLUP
+    use_pcnt: false
+    # 10s while bringing the tach up; 60s is fine once it's trusted
+    update_interval: 10s
     name: "Fan 2 (Inbound) RPM"
     id: fan2_rpm
     unit_of_measurement: "RPM"
     filters:
-      - multiply: 30.0
+      - multiply: 0.5 # pulses/min / 2 pulses-per-rev
 
 # --- PWM control lines to fans (hardware LEDC @ 25kHz, per Noctua spec) ---
 output:
@@ -104,6 +137,7 @@ number:
   - platform: template
     name: "Fan Curve Min Temp (C)"
     id: min_temp_c
+    mode: box
     min_value: 0
     max_value: 60
     step: 1
@@ -114,6 +148,7 @@ number:
   - platform: template
     name: "Fan Curve Max Temp (C)"
     id: max_temp_c
+    mode: box
     min_value: 0
     max_value: 80
     step: 1
@@ -124,6 +159,7 @@ number:
   - platform: template
     name: "Fan Minimum Duty"
     id: min_duty
+    mode: box
     min_value: 0
     max_value: 1
     step: 0.05
@@ -137,11 +173,19 @@ interval:
     then:
       - lambda: |-
           float t = id(case_temp).state;
-          if (std::isnan(t)) return;
-
           float lo = id(min_temp_c).state;
           float hi = id(max_temp_c).state;
           float floor_duty = id(min_duty).state;
+
+          // Guard every input, not just the temperature. A NaN setpoint would
+          // fall through both comparisons below and produce a NaN duty.
+          if (std::isnan(t) || std::isnan(lo) || std::isnan(hi) ||
+              std::isnan(floor_duty)) {
+            ESP_LOGW("fan", "skipped: t=%.2f lo=%.1f hi=%.1f floor=%.2f",
+                     t, lo, hi, floor_duty);
+            return;
+          }
+
           float duty = 0.0;
 
           if (t <= lo) {
@@ -152,6 +196,9 @@ interval:
             float ratio = (t - lo) / (hi - lo);
             duty = floor_duty + ratio * (1.0 - floor_duty);
           }
+
+          ESP_LOGD("fan", "t=%.2f lo=%.1f hi=%.1f floor=%.2f -> duty=%.3f dual=%d",
+                   t, lo, hi, floor_duty, duty, id(dual_fan_mode).state ? 1 : 0);
 
           id(fan1_pwm_out).set_level(duty);
 

@@ -90,8 +90,9 @@ sensor:
       number: GPIO19
       mode: INPUT_PULLUP
     use_pcnt: false
-    # 10s while bringing the tach up; 60s is fine once it's trusted
-    update_interval: 10s
+    # Drop to 10s as a temporary debugging aid should a tach problem arise —
+    # see the Problem solving section of the README.
+    update_interval: 60s
     name: "Fan 1 (Outbound) RPM"
     id: fan1_rpm
     unit_of_measurement: "RPM"
@@ -105,8 +106,9 @@ sensor:
       number: GPIO21
       mode: INPUT_PULLUP
     use_pcnt: false
-    # 10s while bringing the tach up; 60s is fine once it's trusted
-    update_interval: 10s
+    # Drop to 10s as a temporary debugging aid should a tach problem arise —
+    # see the Problem solving section of the README.
+    update_interval: 60s
     name: "Fan 2 (Inbound) RPM"
     id: fan2_rpm
     unit_of_measurement: "RPM"

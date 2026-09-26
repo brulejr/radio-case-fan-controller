@@ -154,6 +154,8 @@ trust the colours.
 
 ## The dev board
 
+![ESP32-C6 dev board on the protoboard carrier](../hardware/esp32-photo.jpg)
+
 A third-party ESP32-C6-WROOM-1 board, **2×15 headers**, with two USB-C ports
 (one behind a CH343 USB-UART bridge, one native ESP32-C6 USB/JTAG), BOOT and
 RST buttons, and an addressable RGB LED on GPIO8.
@@ -248,6 +250,13 @@ inside any 2 A buck.
   The connector gives you no protection — it's the same part either way.
 - **No PWM signal means full speed**, not stopped. If you probe or disconnect
   a PWM line with the fan powered, expect it to spin up.
+- **The three fan-curve setpoints persist in flash and outrank the YAML.** They
+  are `restore_value: true`, so `initial_value` applies only to a device that has
+  never had one set. Once you change Min Temp, Max Temp or Minimum Duty from the
+  web UI or Home Assistant, that value survives reboots *and* OTA updates — the
+  config file stops being the source of truth for them. If the curve behaves
+  unexpectedly, read the live values off the `[D][fan]` log line rather than
+  trusting the YAML.
 - `reboot_timeout` in the `wifi:` block is set to `0s`. The ESPHome default is
   15 min, which reboots the device when WiFi is absent — undesirable here, since
   cooling stops while the board reboots. Cooling should not depend on the

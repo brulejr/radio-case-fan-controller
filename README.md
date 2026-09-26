@@ -103,15 +103,17 @@ board from the 25kHz PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11,
 /esphome/icom2370a-fan-controller.yaml    # ESPHome config
 /esphome/secrets.yaml.example
 /hardware/schematic.svg                    # schematic / wiring diagram
+/hardware/esp32-photo.jpg                  # dev board + protoboard carrier, for the header map
 /docs/wiring.md                            # net list, connection table, BOM, bring-up order
 README.md
 .gitignore
 ```
 
-Still to come under `/hardware/`: the OpenSCAD enclosure.
+Still to come under `/hardware/`: the custom PCB, then the OpenSCAD enclosure.
 
 ## TODO
 
-- [ ] Bench-test fan curve against actual enclosure thermal load
-- [ ] Design enclosure (OpenSCAD) once breadboard behavior is validated
+- [ ] Design a custom PCB for the carrier board, using the protoboard build as
+      the reference
+- [ ] Design enclosure (OpenSCAD) once the PCB is finalized
 - [ ] Consider stall detection (tach == 0 while PWM > 0) as a fault alert

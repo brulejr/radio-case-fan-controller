@@ -65,9 +65,10 @@ one_wire:
 
 sensor:
   - platform: dallas_temp
-    # TODO: replace with your probe's actual address — check the boot log after
-    # first flash, ESPHome will list any 1-Wire devices it finds on GPIO6
-    address: 0x0000000000000000
+    # No `address:` on purpose. With a single device on the bus ESPHome selects
+    # it automatically and logs the address it found, so the same firmware runs
+    # on any build of this module without editing. Pin an address only if a
+    # second 1-Wire device is ever added.
     name: "Enclosure Temperature"
     id: case_temp
     update_interval: 5s

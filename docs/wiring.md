@@ -212,7 +212,9 @@ return through the other.
    mis-set buck ends the session.
 2. Power down. Connect the USB-C cable to the dev board only. Power up, confirm
    the board enumerates and the `3V3` pin reads ~3.3 V.
-3. Add the DS18B20 and R1. Flash, and read the boot log for the 1-Wire address.
+3. Add the DS18B20 and R1. Flash, and confirm the probe enumerates in the boot
+   log. The config deliberately pins no address — the sole device on the bus is
+   selected automatically, so the firmware is portable across builds.
    **Unplug the buck while flashing over USB** — one source at a time.
 4. Add Fan 1 and R2. Confirm PWM response and a plausible RPM reading.
 5. Add Fan 2 and R3 if running dual-fan.

@@ -92,8 +92,8 @@ board from the 25kHz PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11,
 ### First flash
 
 1. Copy `secrets.yaml.example` to `secrets.yaml` and fill in your values
-2. Flash and check the boot log for the DS18B20's actual 1-Wire address,
-   then replace the placeholder `address:` in the YAML
+2. Flash. The boot log lists the 1-Wire devices found on GPIO6; confirm the
+   probe enumerates. No address needs configuring — see the note in the YAML
 3. Confirm fan curve thresholds via Home Assistant or the ESPHome web UI
    before buttoning up the enclosure
 
@@ -112,7 +112,6 @@ Still to come under `/hardware/`: the OpenSCAD enclosure.
 
 ## TODO
 
-- [ ] Confirm DS18B20 address after first flash
 - [ ] Bench-test fan curve against actual enclosure thermal load
 - [ ] Design enclosure (OpenSCAD) once breadboard behavior is validated
 - [ ] Consider stall detection (tach == 0 while PWM > 0) as a fault alert

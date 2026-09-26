@@ -15,7 +15,7 @@ Breadboard prototype phase in the lab. The finished unit is a **carrier board**
 - ESP32-C6-WROOM-1 dev board (RISC-V, 2×15 headers, dual USB-C)
 - HiLetgo DS18B20 waterproof temperature probe (1-Wire, stainless steel, 1m)
 - Noctua NF-A4x20 5V PWM fan(s)
-- Buck converter with a **USB-C output** — exact part TBC, see `docs/wiring.md`
+- 12V → 5V buck converter with a **USB-C output** (any module ≥1A)
 
 ## Schematic
 

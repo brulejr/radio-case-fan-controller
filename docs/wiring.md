@@ -223,7 +223,7 @@ return through the other.
 
 | Ref       | Part                                  | Qty | Notes                                      |
 | --------- | ------------------------------------- | --- | ------------------------------------------ |
-| U1        | buck converter, 5 V, USB-C output     | 1   | **part TBC** — see note below              |
+| U1        | 12 V → 5 V buck converter, USB-C out  | 1   | any module ≥1 A; no specific part required |
 | U2        | ESP32-C6-WROOM-1 dev board, 2×15      | 1   | socket it, don't solder down               |
 | —         | DS18B20 waterproof probe, 1 m         | 1   | HiLetgo                                     |
 | Fan 1/2   | Noctua NF-A4x20 5V PWM                | 1–2 | 0.1 A / 0.5 W each; Fan 2 optional          |
@@ -233,10 +233,6 @@ return through the other.
 | —         | 2× 15-pin female header               | 1 set | dev board socket                          |
 | R1        | 4.7 kΩ resistor                       | 1   | 1-Wire pull-up                              |
 | R2, R3    | 10 kΩ resistor                        | 1–2 | tach pull-ups, one per fan                  |
-
-**U1 is unresolved.** The module originally specified was a UMLIFE adjustable
-2.5–35 V / 2 A buck, which does not square with a fixed USB-C output. Record the
-actual part here once chosen.
 
 Current budget: each fan is **0.1 A / 0.5 W** (Noctua spec). The C6 module draws
 on the order of 100 mA average with Wi-Fi up and a few hundred mA on transmit

@@ -8,6 +8,10 @@ is the picture; this page is the thing you build from and check against.
 Target hardware is a **carrier board** — prototype board first, then a custom
 PCB. Breadboarding is development-lab only.
 
+This page describes the protoboard build. The custom PCB keeps every net and
+GPIO but moves the buck on-board and feeds 5 V through the socket instead of a
+USB-C cable — see [`hardware/pcb/README.md`](../hardware/pcb/README.md).
+
 ## Power topology
 
 This is the least obvious part of the design, so it comes first.
@@ -50,8 +54,8 @@ this is mostly a bench-discipline rule.
 | `+3V3`     | dev board onboard regulator| dev board `3V3` → DS18B20 red, R1, R2, R3                               |
 | `GND`      | common return              | J1 `−`, U1 `IN−`, dev board `GND`, DS18B20 black, Fan 1 pin 1, Fan 2 pin 1 |
 | `1W_DATA`  | DS18B20 1-Wire bus         | `GPIO6` ↔ DS18B20 yellow, R1 to `+3V3`                                  |
-| `TACH1/2`  | fan speed, open-collector  | `GPIO19` ↔ Fan 1 pin 3 (R2 to `+3V3`); `GPIO21` ↔ Fan 2 pin 3 (R3)       |
-| `PWM1/2`   | 25 kHz fan control         | `GPIO18` → Fan 1 pin 4; `GPIO20` → Fan 2 pin 4                          |
+| `TACH1/2`  | fan speed, open-collector  | `GPIO21` ↔ Fan 1 pin 3 (R2 to `+3V3`); `GPIO19` ↔ Fan 2 pin 3 (R3)       |
+| `PWM1/2`   | 25 kHz fan control         | `GPIO20` → Fan 1 pin 4; `GPIO18` → Fan 2 pin 4                          |
 
 `GND` is one net throughout. On the schematic the input-side and output-side
 segments are drawn without a wire between them — the path runs through U1 and
@@ -97,10 +101,10 @@ drives the fan's internal commutation, so there's little for a bulk cap to do.
 | MCU pin  | Side  | To                  | Passive             | Notes                |
 | -------- | ----- | ------------------- | ------------------- | --------------------- |
 | `GPIO6`  | Left  | DS18B20 yellow      | R1 4.7 kΩ to `+3V3` | 1-Wire data           |
-| `GPIO18` | Right | Fan 1 pin 4 (blue)  | —                   | LEDC PWM, 25 kHz      |
-| `GPIO19` | Right | Fan 1 pin 3 (green) | R2 10 kΩ to `+3V3`  | tach, open-collector  |
-| `GPIO20` | Right | Fan 2 pin 4 (blue)  | —                   | LEDC PWM, 25 kHz      |
-| `GPIO21` | Right | Fan 2 pin 3 (green) | R3 10 kΩ to `+3V3`  | tach, open-collector  |
+| `GPIO18` | Right | Fan 2 pin 4 (blue)  | —                   | LEDC PWM, 25 kHz      |
+| `GPIO19` | Right | Fan 2 pin 3 (green) | R3 10 kΩ to `+3V3`  | tach, open-collector  |
+| `GPIO20` | Right | Fan 1 pin 4 (blue)  | —                   | LEDC PWM, 25 kHz      |
+| `GPIO21` | Right | Fan 1 pin 3 (green) | R2 10 kΩ to `+3V3`  | tach, open-collector  |
 | `3V3`    | Left  | DS18B20 red         | —                   | also feeds R1/R2/R3   |
 | `GND`    | Either| DS18B20 black       | —                   |                       |
 
@@ -145,8 +149,8 @@ if you ever want to fall back to voltage-controlled fans.
 | --- | ------ | -------- | --------------------------------- |
 | 1   | black  | GND      | `GND`                             |
 | 2   | yellow | +5 V     | dev board `5V` pin                |
-| 3   | green  | tach     | GPIO19 / GPIO21, pulled to +3.3 V |
-| 4   | blue   | PWM in   | GPIO18 / GPIO20                   |
+| 3   | green  | tach     | Fan 1 GPIO21 / Fan 2 GPIO19, pulled to +3.3 V |
+| 4   | blue   | PWM in   | Fan 1 GPIO20 / Fan 2 GPIO18       |
 
 **DS18B20 waterproof probe**: red = VDD, yellow = data, black = GND. Some
 batches ship red/white/black — white is then the data line. Meter it before you
@@ -171,8 +175,8 @@ plus TX/RX = GPIO16/17), so nothing is omitted.
 
 The split across sides is deliberate: the four fan signals sit together on the
 right, and the 1-Wire probe is on the left — the 25 kHz PWM edges are the
-noisiest thing on the board and the 1-Wire bus, pulled up through 4.7 kΩ over a
-metre of cable, is the most susceptible.
+noisiest thing on the board and the 1-Wire bus, pulled up through 4.7 kΩ over
+~380 mm of cable, is the most susceptible.
 
 The schematic groups pins by function rather than physical position, so its pin
 order does not match the header — go by pin name.
@@ -227,7 +231,7 @@ return through the other.
 | --------- | ------------------------------------- | --- | ------------------------------------------ |
 | U1        | 12 V → 5 V buck converter, USB-C out  | 1   | any module ≥1 A; no specific part required |
 | U2        | ESP32-C6-WROOM-1 dev board, 2×15      | 1   | socket it, don't solder down               |
-| —         | DS18B20 waterproof probe, 1 m         | 1   | HiLetgo                                     |
+| —         | DS18B20 waterproof probe, ~380 mm         | 1   | HiLetgo                                     |
 | Fan 1/2   | Noctua NF-A4x20 5V PWM                | 1–2 | 0.1 A / 0.5 W each; Fan 2 optional          |
 | J2, J3    | 4-pin fan header, 2.54 mm THT         | 2   | Molex 47053-1000 or equivalent              |
 | J4        | 3-pos terminal block, 2.54 / 5.08 mm  | 1   | DS18B20 probe                               |
@@ -263,7 +267,11 @@ inside any 2 A buck.
   network.
 - The ESPHome config also sets `INPUT_PULLUP` on the tach pins. That's belt and
   braces — the internal pull-up is ~45 kΩ, weak enough that a long fan lead can
-  round the edge off. Keep the external 10 kΩ parts.
+  round the edge off. Keep the external 10 kΩ parts. **A missing one also causes
+  RF interference:** with only the internal pull-up, PWM edges couple onto the
+  tach line, and the resulting interrupt storm put a hum on nearby radios. The
+  RPM still reads plausibly, so check the joints rather than trusting the
+  reading.
 - PWM is driven push-pull at 3.3 V from the C6's LEDC peripheral. Noctua's 5 V
   PWM fans accept a 3.3 V control signal, so no level shifter is needed.
 - Fan behaviour below ~20 % duty is not specified by the 4-wire standard. The

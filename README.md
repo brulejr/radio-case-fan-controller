@@ -11,13 +11,14 @@ passive intake) or two (matched outbound + inbound), switchable in software.
 running in the radio case: temperature-driven fan control, dual-fan operation
 and RPM monitoring are all verified on hardware.
 
-Next is a custom PCB to replace the protoboard, then the enclosure. Breadboard
-was development-lab only and is behind us.
+The custom carrier PCB (rev A) is drawn — see [`hardware/pcb/`](hardware/pcb/) —
+and awaits verification of the dev board's header spacing before ordering.
+The enclosure follows. Breadboard was development-lab only and is behind us.
 
 ## Hardware on hand
 
 - ESP32-C6-WROOM-1 dev board (RISC-V, 2×15 headers, dual USB-C)
-- HiLetgo DS18B20 waterproof temperature probe (1-Wire, stainless steel, 1m)
+- HiLetgo DS18B20 waterproof temperature probe (1-Wire, stainless steel, ~380 mm cable)
 - Noctua NF-A4x20 5V PWM fan(s)
 - 12V → 5V buck converter with a **USB-C output** (any module ≥1A)
 
@@ -34,10 +35,10 @@ connector pinouts, the BOM, and the order to bring the board up in.
 | Signal                | GPIO   | Side   | Notes                                            |
 | --------------------- | ------ | ------ | ------------------------------------------------ |
 | DS18B20 data (1-Wire) | GPIO6  | Left   | 4.7kΩ pull-up to 3.3V between data and VCC       |
-| Fan 1 (outbound) PWM  | GPIO18 | Right  | Hardware LEDC output, 25kHz per Noctua PWM spec  |
-| Fan 1 tach            | GPIO19 | Right  | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
-| Fan 2 (inbound) PWM   | GPIO20 | Right  | Hardware LEDC output, 25kHz                      |
-| Fan 2 tach            | GPIO21 | Right  | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
+| Fan 1 (outbound) PWM  | GPIO20 | Right  | Hardware LEDC output, 25kHz per Noctua PWM spec  |
+| Fan 1 tach            | GPIO21 | Right  | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
+| Fan 2 (inbound) PWM   | GPIO18 | Right  | Hardware LEDC output, 25kHz                      |
+| Fan 2 tach            | GPIO19 | Right  | Open-collector; 10kΩ pull-up to **3.3V**, not 5V |
 
 Pins chosen to avoid the C6 strapping pins (4, 5, 8, 9, 15 — 8 also drives the
 onboard RGB LED, 9 is the BOOT button, 15 has no internal pull), the USB
@@ -108,12 +109,13 @@ board from the 25kHz PWM edges. Spare after this: GPIO0, 1, 2, 3, 7, 10, 11,
 /esphome/secrets.yaml.example
 /hardware/schematic.svg                    # schematic / wiring diagram
 /hardware/esp32-photo.jpg                  # dev board + protoboard carrier, for the header map
+/hardware/pcb/                             # KiCad 8 carrier PCB, rev A
 /docs/wiring.md                            # net list, connection table, BOM, bring-up order
 README.md
 .gitignore
 ```
 
-Still to come under `/hardware/`: the custom PCB, then the OpenSCAD enclosure.
+Still to come under `/hardware/`: the OpenSCAD enclosure.
 
 ## Problem solving
 
@@ -141,6 +143,7 @@ both reboots and OTA updates. Trust this line, not the config file.
 | Fan seems to idle quietly | It may in fact be at 100%. An NF-A4x20 is only ~18 dB(A) flat out, so full speed and idling sound alike without a reference |
 | Fan turns at 0% duty | Something is wrong upstream — this fan **does** stop at 0%, verified on the bench |
 | RPM reads `0.00` while the fan spins | Tach pull-up on the wrong rail, or the tach line open. A spinning fan's tach reads ~1.6V on a DC meter; a flat rail voltage means no pulses |
+| Low hum on nearby 2 m / 70 cm radios while the fans run | Check both tach pull-up joints (R2/R3, 10 kΩ) first — a disconnected one was found during the investigation. RC filters, ferrites and the probe made no difference. Not yet fully resolved |
 | RPM reads absurdly high (~234,000) | The `multiply` filter is wrong. `pulse_counter` reports pulses/min, so RPM = pulses/min ÷ 2 |
 
 ### Techniques worth remembering
@@ -160,12 +163,23 @@ them to `10s` temporarily while chasing a tach problem, then put them back.
 `http://<device-ip>/` with the fan-curve numbers and the Dual Fan Mode switch.
 Assets are embedded in flash, so it works with no internet.
 
-**Reference figures.** At ~67% duty expect roughly 3,900 RPM (Fan 1) and
-4,050 RPM (Fan 2) — useful for judging whether a reading is plausible.
+**RF interference tests: no temperature means no PWM.** The control loop
+returns early while the temperature is invalid, so with the probe unplugged, or
+with `update_interval: never`, the PWM lines never switch and the fans get no
+commanded duty. Any test that removes the probe therefore also changes the fans.
+To separate them, leave the probe in and move **Fan Curve Min Temp** above or
+below the case temperature — and **confirm from the `[D][fan]` duty and the RPM
+readings which fans are actually running** before judging a result.
+
+**Reference figures.** At ~67% duty expect roughly 4,050 RPM (Fan 1,
+outbound) and 3,900 RPM (Fan 2, inbound) — useful for judging whether a reading
+is plausible. (Recorded before the fan pin assignments were corrected, when the
+entity names were swapped; the figures are attributed to the physical fans.)
 
 ## TODO
 
-- [ ] Design a custom PCB for the carrier board, using the protoboard build as
-      the reference
+- [x] Design a custom PCB for the carrier board, using the protoboard build as
+      the reference (rev A, [`hardware/pcb/`](hardware/pcb/))
+- [ ] Measure the dev board header row spacing (PCB assumes 25.4 mm), then order
 - [ ] Design enclosure (OpenSCAD) once the PCB is finalized
 - [ ] Consider stall detection (tach == 0 while PWM > 0) as a fault alert

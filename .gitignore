@@ -2,3 +2,10 @@ secrets.yaml
 .esphome/
 *.bin
 .DS_Store
+
+# KiCad per-user and backup files
+*.kicad_prl
+*-backups/
+fp-info-cache
+*.lck
+hardware/pcb/fab/

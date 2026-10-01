@@ -87,7 +87,7 @@ sensor:
   # to retest the hardware counter.
   - platform: pulse_counter
     pin:
-      number: GPIO19
+      number: GPIO21
       mode: INPUT_PULLUP
     use_pcnt: false
     # Drop to 10s as a temporary debugging aid should a tach problem arise —
@@ -103,7 +103,7 @@ sensor:
 
   - platform: pulse_counter
     pin:
-      number: GPIO21
+      number: GPIO19
       mode: INPUT_PULLUP
     use_pcnt: false
     # Drop to 10s as a temporary debugging aid should a tach problem arise —
@@ -118,12 +118,12 @@ sensor:
 # --- PWM control lines to fans (hardware LEDC @ 25kHz, per Noctua spec) ---
 output:
   - platform: ledc
-    pin: GPIO18
+    pin: GPIO20
     id: fan1_pwm_out
     frequency: 25000 Hz
 
   - platform: ledc
-    pin: GPIO20
+    pin: GPIO18
     id: fan2_pwm_out
     frequency: 25000 Hz
 

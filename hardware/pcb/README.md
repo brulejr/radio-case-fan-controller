@@ -17,13 +17,13 @@ moves onto the board, so there's no USB-C cable between them. Every passive is
 Only stock KiCad 8 libraries are used. Nothing needs installing beyond KiCad.
 ERC, DRC and schematic parity are all clean.
 
-## ⚠ Verify before ordering
+## Dev board header spacing
 
-**Dev board header row spacing.** The socket rows J5/J6 are **25.4 mm (10 ×
-0.1") apart, centre to centre**. That figure was estimated from the prototype
-photo, not measured. Count the protoboard holes between the two headers, or
-use calipers. A wrong value makes the board scrap. To change it, move J6 in
-the PCB and re-route the filter block between the rows.
+The socket rows J5/J6 are **25.4 mm (10 × 0.1") apart, centre to centre**,
+confirmed against the dev boards on hand (2026-10-01). Boards of this type come
+in 0.1" steps (22.86 / 25.4 / 27.94 mm), so a different dev board needs
+checking before reuse. To change it, move J6 and re-route the filter block
+between the rows.
 
 ## Board
 
@@ -207,11 +207,32 @@ outline.
 
 ## Fabrication outputs
 
-These are not committed. Generate them with:
+These are not committed (`hardware/pcb/fab/` is git-ignored). Regenerate them
+from this directory with:
 
 ```
-kicad-cli pcb export gerbers -o fab/ fan-controller-carrier.kicad_pcb
-kicad-cli pcb export drill   -o fab/ fan-controller-carrier.kicad_pcb
+mkdir -p fab/out
+kicad-cli pcb export gerbers --layers F.Cu,B.Cu,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts \
+    --subtract-soldermask -o fab/out/ fan-controller-carrier.kicad_pcb
+kicad-cli pcb export drill --format excellon --excellon-units mm \
+    --excellon-zeros-format decimal --excellon-separate-th \
+    --generate-map --map-format gerberx2 -o fab/out/ fan-controller-carrier.kicad_pcb
+cd fab/out && zip ../fan-controller-carrier-revA-gerbers.zip \
+    *.gtl *.gbl *.gto *.gbo *.gts *.gbs *.gm1 *-PTH.drl *-NPTH.drl
 ```
 
-(`hardware/pcb/fab/` is git-ignored.)
+Upload the zip as-is to JLCPCB, PCBWay or OSH Park. The drill maps
+(`*-drl_map.gbr`) stay out of the zip; they're for people, and some fabs' file
+detection trips over them.
+
+Expected contents, useful for checking a fab's preview:
+
+| | |
+| --- | --- |
+| Outline | 90.00 × 54.00 mm |
+| Plated holes | 93: 17 vias 0.3 mm, 30 × 0.8, 3 × 0.95 (J4), 33 × 1.0, 8 × 1.02 (fan headers), 2 × 1.3 (J1) |
+| Non-plated holes | 6: 4 × 3.2 mm (M3), 2 × 1.1 mm (fan-header pegs) |
+
+Order settings: 2 layers, 1.6 mm, 1 oz copper, any soldermask colour, HASL
+(lead-free) or ENIG. The narrowest trace and gap (0.3 / 0.27 mm) and the
+smallest via (0.3 mm drill) are within every fab's standard limits.

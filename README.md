@@ -11,8 +11,8 @@ passive intake) or two (matched outbound + inbound), switchable in software.
 running in the radio case: temperature-driven fan control, dual-fan operation
 and RPM monitoring are all verified on hardware.
 
-The custom carrier PCB (rev A) is drawn — see [`hardware/pcb/`](hardware/pcb/) —
-and awaits verification of the dev board's header spacing before ordering.
+The custom carrier PCB (rev A) is drawn and checked — see
+[`hardware/pcb/`](hardware/pcb/) — and is ready to order.
 The enclosure follows. Breadboard was development-lab only and is behind us.
 
 ## Hardware on hand
@@ -180,6 +180,7 @@ entity names were swapped; the figures are attributed to the physical fans.)
 
 - [x] Design a custom PCB for the carrier board, using the protoboard build as
       the reference (rev A, [`hardware/pcb/`](hardware/pcb/))
-- [ ] Measure the dev board header row spacing (PCB assumes 25.4 mm), then order
+- [x] Confirm the dev board header row spacing (25.4 mm)
+- [ ] Order the rev A boards
 - [ ] Design enclosure (OpenSCAD) once the PCB is finalized
 - [ ] Consider stall detection (tach == 0 while PWM > 0) as a fault alert
